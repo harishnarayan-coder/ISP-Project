@@ -32,13 +32,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register API Routers under /api
-app.include_router(health.router, prefix="/api")
-app.include_router(forecast.router, prefix="/api")
-app.include_router(models.router, prefix="/api")
-app.include_router(weather.router, prefix="/api")
-app.include_router(dataset.router, prefix="/api")
-app.include_router(history.router, prefix="/api")
+# Register API Routers under both /api and root (to seamlessly support local dev and Vercel serverless rewrites)
+api_routers = [health.router, forecast.router, models.router, weather.router, dataset.router, history.router]
+for r in api_routers:
+    app.include_router(r, prefix="/api")
+    app.include_router(r)
 
 @app.get("/")
 async def root():
