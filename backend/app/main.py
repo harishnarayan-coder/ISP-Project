@@ -15,6 +15,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.api.endpoints import health, forecast, models, weather, dataset, history
 
+from fastapi import FastAPI, Request
+
 app = FastAPI(
     title="RENEWCAST API",
     description="Weather-Aware Adaptive Multi-Model Deep Learning System for Solar and Wind Energy Forecasting",
@@ -22,6 +24,11 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+@app.middleware("http")
+async def log_incoming_requests(request: Request, call_next):
+    print(f"[RENEWCAST VERCEL LOG] {request.method} {request.url.path}")
+    return await call_next(request)
 
 # CORS configuration allowing local frontend development
 app.add_middleware(
