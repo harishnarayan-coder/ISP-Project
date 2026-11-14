@@ -25,6 +25,19 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+@app.exception_handler(404)
+async def custom_404(request: Request, exc):
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=404,
+        content={
+            "detail": "Not Found",
+            "received_path": request.url.path,
+            "scope_path": request.scope.get("path"),
+            "root_path": request.scope.get("root_path")
+        }
+    )
+
 @app.middleware("http")
 async def log_incoming_requests(request: Request, call_next):
     print(f"[RENEWCAST VERCEL LOG] {request.method} {request.url.path}")
