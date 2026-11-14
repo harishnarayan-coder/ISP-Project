@@ -1,0 +1,161 @@
+{
+  "dataset_info": {
+    "solar_dataset": "NREL PVDAQ Solar Power Dataset (Hourly)",
+    "wind_dataset": "NREL WIND Toolkit High-Resolution Dataset (Hourly)",
+    "test_split_ratio": 0.2,
+    "sequence_length": 24,
+    "last_benchmark_run": "2026-09-15T10:00:00Z"
+  },
+  "horizons": {
+    "1h": {
+      "lstm": {
+        "mae": 0.284,
+        "rmse": 0.412,
+        "mape": 4.82,
+        "r2": 0.941,
+        "inference_time_ms": 14.2
+      },
+      "gru": {
+        "mae": 0.261,
+        "rmse": 0.389,
+        "mape": 4.45,
+        "r2": 0.949,
+        "inference_time_ms": 10.8
+      },
+      "cnn_lstm": {
+        "mae": 0.238,
+        "rmse": 0.354,
+        "mape": 4.02,
+        "r2": 0.958,
+        "inference_time_ms": 18.5
+      },
+      "adaptive_fusion": {
+        "mae": 0.198,
+        "rmse": 0.301,
+        "mape": 3.35,
+        "r2": 0.971,
+        "inference_time_ms": 22.4,
+        "improvement_pct": 16.8
+      }
+    },
+    "6h": {
+      "lstm": {
+        "mae": 0.465,
+        "rmse": 0.648,
+        "mape": 7.91,
+        "r2": 0.902,
+        "inference_time_ms": 15.1
+      },
+      "gru": {
+        "mae": 0.441,
+        "rmse": 0.612,
+        "mape": 7.42,
+        "r2": 0.911,
+        "inference_time_ms": 11.4
+      },
+      "cnn_lstm": {
+        "mae": 0.418,
+        "rmse": 0.583,
+        "mape": 7.05,
+        "r2": 0.923,
+        "inference_time_ms": 19.1
+      },
+      "adaptive_fusion": {
+        "mae": 0.352,
+        "rmse": 0.495,
+        "mape": 5.92,
+        "r2": 0.946,
+        "inference_time_ms": 23.6,
+        "improvement_pct": 15.8
+      }
+    },
+    "12h": {
+      "lstm": {
+        "mae": 0.684,
+        "rmse": 0.912,
+        "mape": 11.45,
+        "r2": 0.852,
+        "inference_time_ms": 16.0
+      },
+      "gru": {
+        "mae": 0.652,
+        "rmse": 0.879,
+        "mape": 10.92,
+        "r2": 0.864,
+        "inference_time_ms": 12.1
+      },
+      "cnn_lstm": {
+        "mae": 0.619,
+        "rmse": 0.835,
+        "mape": 10.28,
+        "r2": 0.878,
+        "inference_time_ms": 20.2
+      },
+      "adaptive_fusion": {
+        "mae": 0.531,
+        "rmse": 0.724,
+        "mape": 8.84,
+        "r2": 0.912,
+        "inference_time_ms": 24.8,
+        "improvement_pct": 14.2
+      }
+    },
+    "24h": {
+      "lstm": {
+        "mae": 0.892,
+        "rmse": 1.214,
+        "mape": 14.82,
+        "r2": 0.801,
+        "inference_time_ms": 17.5
+      },
+      "gru": {
+        "mae": 0.861,
+        "rmse": 1.182,
+        "mape": 14.21,
+        "r2": 0.814,
+        "inference_time_ms": 13.0
+      },
+      "cnn_lstm": {
+        "mae": 0.812,
+        "rmse": 1.115,
+        "mape": 13.45,
+        "r2": 0.835,
+        "inference_time_ms": 21.4
+      },
+      "adaptive_fusion": {
+        "mae": 0.704,
+        "rmse": 0.978,
+        "mape": 11.62,
+        "r2": 0.874,
+        "inference_time_ms": 26.2,
+        "improvement_pct": 13.3
+      }
+    }
+  },
+  "weather_regime_weights": {
+    "high_solar_clear_sky": {
+      "lstm": 0.28,
+      "gru": 0.32,
+      "cnn_lstm": 0.40,
+      "description": "High irradiance with steady diurnal ramp favours CNN-LSTM pattern capture."
+    },
+    "cloudy_turbulent_wind": {
+      "lstm": 0.22,
+      "gru": 0.26,
+      "cnn_lstm": 0.52,
+      "description": "High weather volatility and cloud transients heavily favour CNN local feature extraction."
+    },
+    "steady_breeze_overcast": {
+      "lstm": 0.34,
+      "gru": 0.38,
+      "cnn_lstm": 0.28,
+      "description": "Stable laminar wind flow and muted solar generation favour GRU and LSTM sequential persistence."
+    },
+    "default_balanced": {
+      "lstm": 0.30,
+      "gru": 0.30,
+      "cnn_lstm": 0.40,
+      "description": "Balanced multi-model consensus under nominal meteorological conditions."
+    }
+  }
+}
