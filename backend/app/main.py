@@ -11,11 +11,11 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from backend.app.api.endpoints import health, forecast, models, weather, dataset, history
-
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from backend.app.api.endpoints import health, forecast, models, weather, dataset, history
 
 app = FastAPI(
     title="RENEWCAST API",
@@ -45,14 +45,57 @@ for r in api_routers:
     app.include_router(r, prefix="/api")
     app.include_router(r)
 
-@app.get("/")
-async def root():
+@app.get("/api")
+async def api_root():
     return {
-        "system": "RENEWCAST",
+        "system": "RENEWCAST API",
         "description": "Weather-Aware Adaptive Multi-Model Deep Learning System for Solar and Wind Energy Forecasting",
         "documentation": "/docs",
         "status": "online"
     }
+
+# Check for built frontend distribution directory (local build or Vercel includeFiles)
+candidate_dirs = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")),
+    os.path.abspath(os.path.join(os.getcwd(), "frontend", "dist")),
+    os.path.abspath(os.path.join(os.getcwd(), "dist")),
+]
+FRONTEND_DIST = None
+for candidate in candidate_dirs:
+    if os.path.isdir(candidate) and os.path.isfile(os.path.join(candidate, "index.html")):
+        FRONTEND_DIST = candidate
+        break
+
+if FRONTEND_DIST:
+    assets_dir = os.path.join(FRONTEND_DIST, "assets")
+    if os.path.isdir(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="static_assets")
+
+    @app.get("/")
+    async def serve_root():
+        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        # Don't intercept API or docs routes
+        if full_path.startswith("api/") or full_path in ("docs", "redoc", "openapi.json"):
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Not Found")
+
+        target = os.path.join(FRONTEND_DIST, full_path)
+        if os.path.isfile(target):
+            return FileResponse(target)
+
+        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
+else:
+    @app.get("/")
+    async def root():
+        return {
+            "system": "RENEWCAST",
+            "description": "Weather-Aware Adaptive Multi-Model Deep Learning System for Solar and Wind Energy Forecasting",
+            "documentation": "/docs",
+            "status": "online"
+        }
 
 if __name__ == "__main__":
     import uvicorn
