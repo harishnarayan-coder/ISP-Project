@@ -25,19 +25,6 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-@app.exception_handler(404)
-async def custom_404(request: Request, exc):
-    from fastapi.responses import JSONResponse
-    return JSONResponse(
-        status_code=404,
-        content={
-            "detail": "Not Found",
-            "received_path": request.url.path,
-            "scope_path": request.scope.get("path"),
-            "root_path": request.scope.get("root_path")
-        }
-    )
-
 @app.middleware("http")
 async def log_incoming_requests(request: Request, call_next):
     print(f"[RENEWCAST VERCEL LOG] {request.method} {request.url.path}")
@@ -90,16 +77,26 @@ if FRONTEND_DIST:
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
+        clean_path = full_path.lstrip("/\\")
         # Don't intercept API or docs routes
-        if full_path.startswith("api/") or full_path in ("docs", "redoc", "openapi.json"):
+        if clean_path.startswith("api") or clean_path in ("docs", "redoc", "openapi.json"):
             from fastapi import HTTPException
             raise HTTPException(status_code=404, detail="Not Found")
 
-        target = os.path.join(FRONTEND_DIST, full_path)
+        target = os.path.join(FRONTEND_DIST, clean_path)
         if os.path.isfile(target):
-            return FileResponse(target)
+            media_type = None
+            if target.endswith(".js"):
+                media_type = "application/javascript"
+            elif target.endswith(".css"):
+                media_type = "text/css"
+            elif target.endswith(".svg"):
+                media_type = "image/svg+xml"
+            elif target.endswith(".html"):
+                media_type = "text/html"
+            return FileResponse(target, media_type=media_type)
 
-        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
+        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"), media_type="text/html")
 else:
     @app.get("/")
     async def root():
