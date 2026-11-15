@@ -71,9 +71,16 @@ if FRONTEND_DIST:
     if os.path.isdir(assets_dir):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="static_assets")
 
+    def get_index_response():
+        res = FileResponse(os.path.join(FRONTEND_DIST, "index.html"), media_type="text/html")
+        res.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        res.headers["Pragma"] = "no-cache"
+        res.headers["Expires"] = "0"
+        return res
+
     @app.get("/")
     async def serve_root():
-        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"))
+        return get_index_response()
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
@@ -93,10 +100,12 @@ if FRONTEND_DIST:
             elif target.endswith(".svg"):
                 media_type = "image/svg+xml"
             elif target.endswith(".html"):
-                media_type = "text/html"
-            return FileResponse(target, media_type=media_type)
+                return get_index_response()
+            res = FileResponse(target, media_type=media_type)
+            res.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            return res
 
-        return FileResponse(os.path.join(FRONTEND_DIST, "index.html"), media_type="text/html")
+        return get_index_response()
 else:
     @app.get("/")
     async def root():

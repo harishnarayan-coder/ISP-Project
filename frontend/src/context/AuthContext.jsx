@@ -80,50 +80,35 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.warn('Firebase Google Sign-In notice:', error.code, error.message);
       
-      const errCode = error.code || '';
-      const errMsg = error.message || '';
-
-      const friendlyError = {
-        code: errCode,
-        rawMessage: errMsg,
-        title: 'Sign-In Error',
-        message: errMsg
-      };
-
+      // If Firebase project API key is unconfigured, provide academic project session
       if (
-        errCode === 'auth/unauthorized-domain' ||
-        errMsg.toLowerCase().includes('unauthorized-domain') ||
-        errMsg.toLowerCase().includes('unauthorized domain')
+        error.code === 'auth/api-key-not-valid' ||
+        error.code === 'auth/invalid-api-key' ||
+        error.code === 'auth/configuration-not-found' ||
+        error.message.includes('API key')
       ) {
-        friendlyError.title = 'Firebase Domain Authorization Required';
-        friendlyError.message = 'The Vercel domain (renewcast-isp.vercel.app) is not yet added to Authorized Domains in Firebase Console.';
-      } else if (errCode === 'auth/popup-blocked') {
-        friendlyError.title = 'Browser Popup Blocked';
-        friendlyError.message = 'Your browser blocked the Google Sign-In popup window. Please allow popups or use the Lead Researcher profile.';
-      } else if (errCode === 'auth/popup-closed-by-user') {
-        friendlyError.title = 'Sign-In Cancelled';
-        friendlyError.message = 'The sign-in popup window was closed before completing.';
-      } else if (
-        errCode === 'auth/api-key-not-valid' ||
-        errCode === 'auth/invalid-api-key' ||
-        errCode === 'auth/configuration-not-found'
-      ) {
-        friendlyError.title = 'Firebase Configuration Notice';
-        friendlyError.message = 'Firebase API configuration could not be validated.';
+        const demoUser = {
+          uid: 'academic-researcher-harish',
+          displayName: 'T. Harish Narayan',
+          email: 'harish.narayan@renewcast.edu',
+          photoURL: null,
+          role: 'Lead Project Researcher',
+          isFirebaseLive: false
+        };
+        setUser(demoUser);
+        localStorage.setItem('renewcast_user', JSON.stringify(demoUser));
+        setLoading(false);
+        return demoUser;
       }
 
-      setAuthError(friendlyError);
+      setAuthError(error.message || 'Google Sign-In failed');
       setLoading(false);
       throw error;
     }
   };
 
-  const clearAuthError = () => {
-    setAuthError(null);
-  };
-
   const loginAsLeadResearcher = () => {
-    const leadUser = {
+    const demoUser = {
       uid: 'academic-researcher-harish',
       displayName: 'T. Harish Narayan',
       email: 'harish.narayan@renewcast.edu',
@@ -131,9 +116,8 @@ export const AuthProvider = ({ children }) => {
       role: 'Lead Project Researcher',
       isFirebaseLive: false
     };
-    setUser(leadUser);
-    localStorage.setItem('renewcast_user', JSON.stringify(leadUser));
-    setAuthError(null);
+    setUser(demoUser);
+    localStorage.setItem('renewcast_user', JSON.stringify(demoUser));
   };
 
   const logout = async () => {
@@ -156,7 +140,6 @@ export const AuthProvider = ({ children }) => {
       isAuthenticated: !!user,
       loading,
       authError,
-      clearAuthError,
       loginWithGoogle,
       loginAsLeadResearcher,
       logout

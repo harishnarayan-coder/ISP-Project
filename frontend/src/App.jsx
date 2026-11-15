@@ -7,13 +7,12 @@ import WeatherPage from './pages/WeatherPage';
 import DatasetPage from './pages/DatasetPage';
 import HistoryPage from './pages/HistoryPage';
 import AboutPage from './pages/AboutPage';
-import AuthModal from './components/AuthModal';
 import { apiService } from './services/api';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Lock } from 'lucide-react';
 
 function AppContent() {
-  const { isAuthenticated, loginWithGoogle, loginAsLeadResearcher, authError } = useAuth();
+  const { isAuthenticated, loginWithGoogle } = useAuth();
   const [activePage, setActivePage] = useState('overview');
   const [currentLocation, setLocation] = useState('Solar-Wind Complex Alpha (34.05°N, 118.25°W)');
   const [currentHorizon, setHorizon] = useState('6h');
@@ -84,9 +83,6 @@ function AppContent() {
         weatherData={weatherData}
       />
 
-      {/* Global Auth Status & Resolution Modal */}
-      <AuthModal onAuthenticated={() => setActivePage('dashboard')} />
-
       {/* Main Content Viewport */}
       <main className="main-content">
         {/* Public Landing Showcase */}
@@ -154,22 +150,6 @@ function AppContent() {
               </svg>
               <span>Sign in with Google</span>
             </button>
-
-            <div style={{ marginTop: '0.75rem' }}>
-              <button
-                onClick={() => loginAsLeadResearcher()}
-                className="btn-secondary"
-                style={{
-                  width: '100%',
-                  justifyContent: 'center',
-                  padding: '0.7rem',
-                  fontSize: '0.85rem',
-                  fontWeight: 500
-                }}
-              >
-                Continue as Lead Researcher (T. Harish Narayan)
-              </button>
-            </div>
 
             <button
               onClick={() => setActivePage('overview')}

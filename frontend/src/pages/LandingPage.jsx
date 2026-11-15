@@ -3,7 +3,7 @@ import { ArrowRight, Sun, Wind, CloudSun, Activity, Cpu, ShieldCheck, ChevronRig
 import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage({ setActivePage, forecastData }) {
-  const { isAuthenticated, loginWithGoogle, loginAsLeadResearcher } = useAuth();
+  const { isAuthenticated, loginWithGoogle } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const solarVal = forecastData?.solar_prediction_mw ?? 4.82;
   const windVal = forecastData?.wind_prediction_mw ?? 3.17;
@@ -122,28 +122,6 @@ export default function LandingPage({ setActivePage, forecastData }) {
               <span>Explore Methodology</span>
             </button>
           </div>
-
-          {!isAuthenticated && (
-            <div style={{ marginTop: '0.85rem' }}>
-              <button
-                onClick={() => {
-                  loginAsLeadResearcher();
-                  setActivePage('dashboard');
-                }}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--text-secondary)',
-                  fontSize: '0.8125rem',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  padding: '0.2rem 0'
-                }}
-              >
-                Or enter research portal directly as Lead Researcher (T. Harish Narayan)
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Minimal Renewable Energy Flow Visualization:
